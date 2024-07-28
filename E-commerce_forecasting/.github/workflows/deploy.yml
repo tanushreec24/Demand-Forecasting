@@ -1,0 +1,71 @@
+name: deploy-ecomm
+
+on:
+  pull_request:
+    branches:
+      - deploy
+  # push:
+  #   branches: [ main ]
+  # schedule:
+  #   - cron: '0 0/6 * * *' # Execute every 6 hours
+  # workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_CRENDENTIALS }}
+      REGION: asia-southeast1
+      REPOSITORY: ecomm-invoice-registry
+      IMAGE_NAME: ecomm-invoice-api
+      SERVICE_NAME: ecomm-invoice-api-service
+      PORT: 80
+
+    steps:
+      - name: Access the repo (Checkout)
+        uses: actions/checkout@v3 # using the "checkout" action
+
+      - name: Create Google Service JSON file and Authenticate
+        run: |
+          echo $SERVICE_ACCOUNT_KEY | base64 -di > $HOME/gcloud-service-key.json
+          gcloud auth activate-service-account --key-file=$HOME/gcloud-service-key.json
+
+      # - name: Authenticate to Google Cloud
+      #   uses: 'google-github-actions/auth@v1'
+      #   with:
+      #     project_id: ${ GCP_PROJECT_ID }
+      #     credentials_json: ${ SERVICE_ACCOUNT_KEY }
+
+      - name: 'Setup Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v1'
+        with:
+          version: 'latest'
+      
+      # - name: Trigger Google Cloud Build
+      #   run: |
+      #     gcloud builds submit --tag gcr.io/${ SERVICE_ACCOUNT_KEY }/ecomm
+
+      - name: 'Push Image to Google Artifact Registry'
+        run: |
+          gcloud auth activate-service-account --key-file=$HOME/gcloud-service-key.json
+          gcloud auth configure-docker "$REGION-docker.pkg.dev"
+          docker build -t "$REGION-docker.pkg.dev/$PROJECT_ID/$IMAGE_NAME:latest" -f deployment/deployment.Dockerfile .
+          docker tag "$REGION-docker.pkg.dev/$PROJECT_ID/$IMAGE_NAME:latest" $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:latest
+          docker push "$REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:latest"
+
+      - name: 'Deploy to Cloud Run with gcloud'
+        run: |
+          gcloud run deploy $SERVICE_NAME --image $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:latest --region $REGION --port $PORT --project $PROJECT_ID --allow-unauthenticated
+
+      # - name: 'Deploy to Cloud Run'
+      #   uses: 'google-github-actions/deploy-cloudrun@v1'
+      #   with:
+      #     service: 'ecomm-invoice-api-service'
+      #     image: ${ REGION }-docker.pkg.dev/${ PROJECT_ID }/${ REPOSITORY }/${ IMAGE_NAME }:latest
+      #     region: ${ REGION }
+
+      - name: 'Delete Credentials from the Runner'
+        run: |
+          rm $HOME/gcloud-service-key.json
