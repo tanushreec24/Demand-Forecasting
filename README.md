@@ -134,6 +134,9 @@ Features used for forecasting include:
 
 This combines data engineering, machine learning, and business intelligence to provide a comprehensive solution for eCommerce inventory management and sales forecasting. The modular structure allows for easy scaling and adaptation to changing business needs.
 
+ ### ppt can be found here :  [E-commerce forecasting ppt](https://docs.google.com/presentation/d/1Rr-EdRPYDHi0h5KqF5DGl-VnsX3_89l4zCzFxGQrkQg/edit?usp=sharing)
+
+
 ## Retail
 
 The COVID-19 pandemic accelerated the shift from traditional to online shopping, especially in developed economies. This surge in e-commerce has created new challenges and opportunities for businesses, particularly in demand forecasting.
