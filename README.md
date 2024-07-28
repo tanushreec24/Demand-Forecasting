@@ -64,7 +64,7 @@ Features used to generate forecasts include autocorrelated hourly energy consump
     - documentation of helper functions
     - presentation of work at live event
 
- ###ppt can be found here : https://docs.google.com/presentation/d/1Mrh05nsj5DKVODjv3AAabWmLUJwW8-fr6Jc1omGzP-4/edit?usp=sharing
+ ### ppt can be found here : [Energy-forecasting ppt](https://docs.google.com/presentation/d/1Mrh05nsj5DKVODjv3AAabWmLUJwW8-fr6Jc1omGzP-4/edit?usp=sharing)
       
 
 ## E-commerce
